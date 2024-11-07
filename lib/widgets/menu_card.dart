@@ -39,7 +39,7 @@ class ItemCard extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => MenuEntryForm(),
+                    builder: (context) => const MenuEntryForm(),
                 ));
             }
         },
