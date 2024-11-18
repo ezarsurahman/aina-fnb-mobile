@@ -356,3 +356,403 @@ Saya menggunakan `ThemeData` pada sebuah `MaterialApp` untuk mendapatkan warna y
 Dalam proyek ini, saya mengelola navigasi antar halaman menggunakan widget `Navigator`. Saya menggunakan fungsi seperti `Navigator.push()` untuk menambahkan halaman baru ke dalam stack, dan `Navigator.pop()` untuk kembali ke halaman sebelumnya. Selain itu, ketika ingin mengganti halaman yang sedang ditampilkan tanpa menambahkannya ke dalam stack, saya menggunakan `Navigator.pushReplacement()`. Untuk mempermudah navigasi, saya juga menambahkan sebuah drawer agar pengguna dapat dengan mudah berpindah antara halaman utama dan halaman form. Tombol pada halaman utama dikonfigurasi dengan `Navigator` untuk mengarahkan pengguna ke halaman form saat ditekan.
 
 </details>
+
+<details>
+<summary>Tugas 9</summary>
+
+#### Jelaskan mengapa kita perlu membuat model untuk melakukan pengambilan ataupun pengiriman data JSON? Apakah akan terjadi error jika kita tidak membuat model terlebih dahulu?
+
+Membuat model untuk melakukan pengambilan atau pengiriman data JSON sangat penting karena model tersebut berfungsi sebagai struktur atau _blueprint_ yang mendefinisikan bagaimana data JSON akan dipetakan ke dalam objek dalam aplikasi. Dengan model, kita dapat dengan mudah mengonversi data JSON yang diterima dari API menjadi objek yang dapat digunakan dalam kode Dart, serta memastikan bahwa data yang dikirim ke API sesuai dengan format yang diharapkan. Model juga membantu dalam validasi data dan memudahkan debugging karena kita dapat dengan jelas melihat struktur data yang sedang digunakan.
+
+Jika kita tidak membuat model terlebih dahulu, kita mungkin masih bisa bekerja dengan data JSON menggunakan _map_ atau _list_ secara langsung, tetapi ini akan membuat kode menjadi lebih sulit dibaca dan dipelihara. Selain itu, tanpa model, kita tidak memiliki jaminan bahwa struktur data yang kita terima atau kirim sesuai dengan yang diharapkan, yang dapat menyebabkan error runtime yang sulit dilacak dan diperbaiki. Model memberikan tipe data yang kuat dan eksplisit, yang membantu mencegah kesalahan dan meningkatkan keandalan aplikasi.
+
+#### Jelaskan fungsi dari library http yang sudah kamu implementasikan pada tugas ini
+Library `http` dalam Dart digunakan untuk melakukan permintaan HTTP ke server. Dalam konteks tugas ini, library `http` digunakan untuk mengirim dan menerima data dari server Django yang berjalan di localhost. Fungsi utama dari library ini adalah untuk memungkinkan aplikasi Flutter berkomunikasi dengan backend melalui protokol HTTP, baik itu untuk melakukan operasi GET, POST, PUT, DELETE, dan lain-lain.
+
+Dengan menggunakan library `http`, aplikasi dapat mengirim data JSON ke server dan menerima respons dalam format JSON juga. Ini sangat penting untuk mengimplementasikan fitur seperti login, register, pengambilan data menu makanan, dan pengiriman data menu baru. Library ini menyediakan cara yang mudah dan efisien untuk menangani permintaan HTTP dan mengelola responsnya, sehingga memudahkan pengembangan aplikasi yang membutuhkan komunikasi dengan server.
+
+#### Jelaskan fungsi dari CookieRequest dan jelaskan mengapa instance CookieRequest perlu untuk dibagikan ke semua komponen di aplikasi Flutter.
+`CookieRequest` adalah kelas yang digunakan untuk mengelola permintaan HTTP yang memerlukan autentikasi berbasis cookie. Kelas ini mempermudah pengiriman permintaan HTTP dengan menyertakan cookie yang diperlukan untuk menjaga sesi pengguna tetap aktif. `CookieRequest` juga menyediakan metode untuk login, logout, dan mengirim permintaan HTTP lainnya dengan cookie yang sudah disimpan.
+
+Instance `CookieRequest` perlu dibagikan ke semua komponen di aplikasi Flutter karena banyak komponen yang memerlukan akses ke sesi pengguna yang sedang aktif. Dengan membagikan instance `CookieRequest` menggunakan `Provider`, semua komponen dapat dengan mudah mengakses dan menggunakan metode yang disediakan oleh `CookieRequest` untuk melakukan operasi yang memerlukan autentikasi, seperti mengambil data dari server atau mengirim data ke server. Ini memastikan bahwa semua permintaan HTTP yang memerlukan autentikasi dapat dilakukan dengan benar dan konsisten di seluruh aplikasi.
+
+#### Jelaskan mekanisme pengiriman data mulai dari input hingga dapat ditampilkan pada Flutter.
+1. **Pengambilan Input dari Pengguna**: Pengguna memasukkan data melalui form yang disediakan di aplikasi Flutter. Data ini kemudian dikumpulkan dan divalidasi sebelum dikirim ke server. Misalnya, pada form penambahan menu, pengguna mengisi detail seperti URL gambar, nama, harga, status ketersediaan, dan deskripsi.
+
+2. **Pengiriman Data ke Server**: Setelah data divalidasi, aplikasi Flutter menggunakan library seperti http atau pbp_django_auth untuk mengirim data ke server melalui permintaan HTTP POST. Data yang dikirim biasanya dalam format JSON. Contoh pengiriman data menggunakan CookieRequest:
+
+3. **Pemrosesan Data di Server**: Server menerima data yang dikirim oleh aplikasi Flutter dan memprosesnya sesuai dengan logika bisnis yang telah ditentukan. Server kemudian menyimpan data tersebut ke dalam database dan mengirimkan respons kembali ke aplikasi Flutter, biasanya dalam format JSON yang berisi status operasi dan data yang relevan.
+
+4. **Menampilkan Data di Aplikasi Flutter**: Aplikasi Flutter menerima respons dari server dan memprosesnya. Data yang diterima kemudian ditampilkan di UI aplikasi. Misalnya, setelah menambahkan menu baru, aplikasi dapat menampilkan daftar menu yang diperbarui dengan mengambil data dari server menggunakan permintaan HTTP GET dan menampilkan data tersebut dalam bentuk list atau grid.
+
+
+Dengan mekanisme ini, data dapat dikirim dari input pengguna, diproses oleh server, dan ditampilkan kembali di aplikasi Flutter, memastikan alur data yang konsisten dan terintegrasi.
+
+#### Jelaskan mekanisme autentikasi dari login, register, hingga logout. Mulai dari input data akun pada Flutter ke Django hingga selesainya proses autentikasi oleh Django dan tampilnya menu pada Flutter.
+
+**Register:**
+
+1. Input Data Akun: Pengguna memasukkan data akun seperti username dan password melalui form register di aplikasi Flutter.
+2. Pengiriman Data ke Server: Data yang dimasukkan dikirim ke server Django menggunakan permintaan HTTP POST. Contoh pengiriman data:
+```dart
+final response = await request.postJson(
+    "http://localhost:8000/auth/register/",
+    jsonEncode({
+      "username": username,
+      "password1": password1,
+      "password2": password2,
+    }));
+```
+3. Pemrosesan di Server: Server Django memproses data yang diterima, memvalidasi, dan menyimpan data akun baru ke database. Jika berhasil, server mengirimkan respons sukses.
+4. Tampilan di Flutter: Aplikasi Flutter menerima respons dari server dan menampilkan pesan sukses atau gagal. Jika sukses, pengguna diarahkan ke halaman login.
+
+**Login:**
+1. Input Data Akun: Pengguna memasukkan username dan password melalui form login di aplikasi Flutter.
+2. Pengiriman Data ke Server: Data login dikirim ke server Django menggunakan permintaan HTTP POST. Contoh pengiriman data:
+```dart
+final response = await request.login(
+    "http://localhost:8000/auth/login/",
+    {'username': username, 'password': password});
+```
+3. Pemrosesan di Server: Server Django memverifikasi kredensial yang diterima. Jika valid, server mengirimkan cookie sesi yang menandakan bahwa pengguna telah berhasil login.
+4. Tampilan di Flutter: Aplikasi Flutter menerima cookie sesi dan menyimpannya. Pengguna diarahkan ke halaman utama (menu) dan pesan selamat datang ditampilkan.
+
+**Logout:**
+1. Permintaan Logout: Pengguna menekan tombol logout di aplikasi Flutter.
+2. Pengiriman Permintaan ke Server: Aplikasi Flutter mengirim permintaan logout ke server Django menggunakan permintaan HTTP POST. Contoh pengiriman data:
+```dart
+final response = await request.logout("http://localhost:8000/auth/logout/");
+```
+
+#### Implementasi Checklist
+1. Selanjutnya, saya membuat sebuah file baru bernama `register.dart` di direktori `aina_fnb_mobile/lib/screens` untuk halaman registrasi akun.
+2. Pada file `register.dart`, saya membuat halaman registrasi dengan form untuk username, password, dan konfirmasi password, serta tombol untuk mengirim data ke server Django.
+```dart
+import 'dart:convert';
+import 'package:aina_fnb_mobile/screens/login.dart';
+import 'package:flutter/material.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
+
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
+
+  @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Register'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Card(
+            elevation: 8,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  const Text(
+                    'Register',
+                    style: TextStyle(
+                      fontSize: 24.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 30.0),
+                  TextFormField(
+                    controller: _usernameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Username',
+                      hintText: 'Enter your username',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your username';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 12.0),
+                  TextFormField(
+                    controller: _passwordController,
+                    decoration: const InputDecoration(
+                      labelText: 'Password',
+                      hintText: 'Enter your password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                    ),
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your password';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 12.0),
+                  TextFormField(
+                    controller: _confirmPasswordController,
+                    decoration: const InputDecoration(
+                      labelText: 'Confirm Password',
+                      hintText: 'Confirm your password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                    ),
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please confirm your password';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 24.0),
+                  ElevatedButton(
+                    onPressed: () async {
+                      String username = _usernameController.text;
+                      String password1 = _passwordController.text;
+                      String password2 = _confirmPasswordController.text;
+
+                      // Cek kredensial
+                      // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
+                      // Untuk menyambungkan Android emulator dengan Django pada localhost,
+                      // gunakan URL http://10.0.2.2/
+                      final response = await request.postJson(
+                          "http://localhost:8000/auth/register/",
+                          jsonEncode({
+                            "username": username,
+                            "password1": password1,
+                            "password2": password2,
+                          }));
+                      if (context.mounted) {
+                        if (response['status'] == 'success') {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Successfully registered!'),
+                            ),
+                          );
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const LoginPage()),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Failed to register!'),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      minimumSize: Size(double.infinity, 50),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    ),
+                    child: const Text('Register'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+```
+3. Saya mengintegrasikan sistem autentikasi Django dengan proyek Flutter menggunakan package `pbp_django_auth` dan `provider`.
+4. Saya membuat halaman login pada proyek tugas Flutter di file `login.dart` di direktori `aina_fnb_mobile/lib/screens`.
+5. Saya membuat model kustom sesuai dengan proyek aplikasi Django di file `food_entry.dart` di direktori `aina_fnb_mobile/lib/models`.
+```dart
+// To parse this JSON data, do
+//
+//     final foodEntry = foodEntryFromJson(jsonString);
+
+import 'dart:convert';
+
+List<FoodEntry> foodEntryFromJson(String str) => List<FoodEntry>.from(json.decode(str).map((x) => FoodEntry.fromJson(x)));
+
+String foodEntryToJson(List<FoodEntry> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+
+class FoodEntry {
+    String model;
+    String pk;
+    Fields fields;
+
+    FoodEntry({
+        required this.model,
+        required this.pk,
+        required this.fields,
+    });
+
+    factory FoodEntry.fromJson(Map<String, dynamic> json) => FoodEntry(
+        model: json["model"],
+        pk: json["pk"],
+        fields: Fields.fromJson(json["fields"]),
+    );
+
+    Map<String, dynamic> toJson() => {
+        "model": model,
+        "pk": pk,
+        "fields": fields.toJson(),
+    };
+}
+
+class Fields {
+    int user;
+    String img;
+    String name;
+    int price;
+    String ready;
+    String description;
+
+    Fields({
+        required this.user,
+        required this.img,
+        required this.name,
+        required this.price,
+        required this.ready,
+        required this.description,
+    });
+
+    factory Fields.fromJson(Map<String, dynamic> json) => Fields(
+        user: json["user"],
+        img: json["img"],
+        name: json["name"],
+        price: json["price"],
+        ready: json["ready"],
+        description: json["description"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "user": user,
+        "img": img,
+        "name": name,
+        "price": price,
+        "ready": ready,
+        "description": description,
+    };
+}
+```
+6. Saya membuat halaman yang berisi daftar semua item yang terdapat pada endpoint JSON di Django yang telah saya deploy di file `list_food_entry.dart` di direktori `aina_fnb_mobile/lib/screens`.
+7. Saya membuat halaman detail untuk setiap item yang terdapat pada halaman daftar item di file `food_detail.dart` di direktori `aina_fnb_mobile/lib/screens`.
+8. Saya melakukan filter pada halaman daftar item dengan hanya menampilkan item yang terasosiasi dengan pengguna yang login di file `list_food_entry.dart`.
+```dart
+@override
+  Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Menu Entry List'),
+      ),
+      drawer: const LeftDrawer(),
+      body: FutureBuilder(
+        future: fetchFood(request),
+        builder: (context, AsyncSnapshot snapshot) {
+          if (snapshot.data == null) {
+            return const Center(child: CircularProgressIndicator());
+            
+          } else {
+            if (snapshot.data.length == 0) {
+              
+              return Center(
+                child:
+                  Column(
+                    children: [
+                      Text(
+                        'Belum ada Menu pada Aina FNB.',
+                        style: TextStyle(fontSize: 20, color: Theme.of(context).colorScheme.primary),
+                      ),
+                      SizedBox(height: 8),
+                    ],
+                  )
+              );
+            } else {
+              return ListView.builder(
+                itemCount: snapshot.data!.length,
+                itemBuilder: (_, index) => InkWell(
+                  child: Container(
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.all(20.0),
+                    decoration:  BoxDecoration(
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Image.network("${snapshot.data![index].fields.img}"),
+                        Text(
+                          "${snapshot.data![index].fields.name}",
+                          style: const TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text("${snapshot.data![index].fields.price}"),
+                        const SizedBox(height: 10),
+                        // Text("${snapshot.data![index].fields.ready}"),
+                        // const SizedBox(height: 10),
+                        Text("${snapshot.data![index].fields.description}")
+                      ],
+                    ),
+                  ),
+                onTap: () => {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => FoodDetailPage(foodID:  snapshot.data![index].pk),
+                    ))
+                },
+                )
+              );
+            }
+          }
+        },
+      ),
+    );
+  }
+```
+
+</details>

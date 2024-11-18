@@ -15,20 +15,10 @@ class FoodDetailPage extends StatefulWidget {
 
 class _FoodDetailPageState extends State<FoodDetailPage> {
   Future<FoodEntry> fetchFoodDetail(CookieRequest request) async {
-    // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
     final response = await request.get('http://localhost:8000/json/${widget.foodID}/'); 
     
-    // Melakukan decode response menjadi bentuk json
     var data = response;
     var hasil = FoodEntry.fromJson(data[0]);
-    
-    // Melakukan konversi data json menjadi object FoodEntry
-    List<FoodEntry> listFood = [];
-    for (var d in data) {
-      if (d != null) {
-        listFood.add(FoodEntry.fromJson(d));
-      }
-    }
     return hasil;
   }
 
