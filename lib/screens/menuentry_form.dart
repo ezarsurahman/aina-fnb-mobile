@@ -1,5 +1,10 @@
+import 'dart:convert';
+
+import 'package:aina_fnb_mobile/screens/menu.dart';
 import 'package:flutter/material.dart';
 import 'package:aina_fnb_mobile/widgets/left_drawer.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
 // TODO: Impor drawer yang sudah dibuat sebelumnya
 
 class MenuEntryForm extends StatefulWidget {
@@ -19,6 +24,7 @@ class _MenuEntryFormState extends State<MenuEntryForm> {
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
     return Scaffold(
       appBar: AppBar(
         title: const Center(
@@ -172,47 +178,40 @@ class _MenuEntryFormState extends State<MenuEntryForm> {
                       backgroundColor: WidgetStateProperty.all(
                           Theme.of(context).colorScheme.primary),
                     ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: const Text('Menu berhasil tersimpan'),
-                                content: SingleChildScrollView(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Column(
-                                        children: [
-                                          Image.network(
-                                            _image,
-                                            errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                                              return const Text('Gagal memuat gambar');
-                                            },
-                                          ),
-                                          Text('Name: $_name'),
-                                          Text('Price: $_price'),
-                                          Text('Ready: $_ready'),
-                                          Text('Description: $_description'),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    child: const Text('OK'),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      _formKey.currentState!.reset();
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                      }
+                    onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                            // Kirim ke Django dan tunggu respons
+                            
+                            final response = await request.postJson(
+                                "http://localhost:8000/create-flutter/",
+                                jsonEncode(<String, String>{
+                                    'img': _image,
+                                    'name': _name,
+                                    'price': _price.toString(),
+                                    'ready': _ready,
+                                    'description': _description,
+                                
+                                }),
+                            );
+                            if (context.mounted) {
+                                if (response['status'] == 'success') {
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(const SnackBar(
+                                    content: Text("Mood baru berhasil disimpan!"),
+                                    ));
+                                    Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => MyHomePage()),
+                                    );
+                                } else {
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(const SnackBar(
+                                        content:
+                                            Text("Terdapat kesalahan, silakan coba lagi."),
+                                    ));
+                                }
+                            }
+                        }
                     },
                     child: const Text(
                       "Save",

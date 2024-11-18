@@ -1,3 +1,4 @@
+import 'package:aina_fnb_mobile/screens/list_food_entry.dart';
 import 'package:flutter/material.dart';
 import 'package:aina_fnb_mobile/screens/menu.dart';
 import 'package:aina_fnb_mobile/screens/menuentry_form.dart';
@@ -60,6 +61,16 @@ class LeftDrawer extends StatelessWidget {
                 ));
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.fastfood),
+            title: const Text('Lihat Daftar Menu'),
+            onTap: () => {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FoodEntryPage(  ))
+              )
+            },
+          )
         ],
       ),
     );
